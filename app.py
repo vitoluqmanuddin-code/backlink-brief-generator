@@ -121,8 +121,8 @@ def validate_inputs(check_serp=False, check_manual=False):
     return errors
 
 
-# ── MODE: AUTO — TOP 5 LANGSUNG ───────────────────────────────────────────────
-if url_mode == "Auto — top 5 langsung":
+# ── MODE: AUTO — SCRAPE SEMUA ─────────────────────────────────────────────────
+if url_mode == "Auto — scrape semua":
     st.divider()
     if st.button("Generate Brief", type="primary", use_container_width=True):
         errors = validate_inputs(check_serp=True)
