@@ -34,7 +34,8 @@ for key, default in {
     "brief_result":    None,
     "usage":           None,
     "model_id":        DEFAULT_MODEL,
-    "media_profiles":  {},
+    "media_profiles":       {},
+    "media_profile_preview": None,
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
@@ -334,8 +335,12 @@ elif url_mode == "Auto — pilih dari SERP":
                 with st.spinner("Scraping URL yang dipilih..."):
                     st.session_state["scraped_preview"] = scrape_urls(selected_urls)
                     st.session_state["brief_result"]    = None
+                st.session_state["media_profile_preview"] = get_or_analyze_media(target_media)
 
             # Preview hasil scraping
+            if st.session_state["media_profile_preview"]:
+                show_media_profile(st.session_state["media_profile_preview"])
+
             if st.session_state["scraped_preview"]:
                 scraped = st.session_state["scraped_preview"]
                 ok = sum(1 for r in scraped if r["success"] and r["word_count"] >= 100)
@@ -383,9 +388,7 @@ elif url_mode == "Auto — pilih dari SERP":
                         if errors:
                             st.stop()
 
-                        media_profile = get_or_analyze_media(target_media)
-                        if media_profile:
-                            show_media_profile(media_profile)
+                        media_profile = st.session_state.get("media_profile_preview")
 
                         article_format = format_choice
                         if format_choice == "auto":
