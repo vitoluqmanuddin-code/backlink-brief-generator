@@ -226,6 +226,7 @@ def build_user_prompt(
     n_tools: int | None,
     scraped_results: list[dict],
     serp_data: dict | None = None,
+    media_profile: dict | None = None,
 ) -> str:
 
     lines = []
@@ -246,6 +247,19 @@ def build_user_prompt(
 
     if mekari_source:
         lines.append(f"Mekari source text/URL: {mekari_source}")
+
+    # ── Media profile ─────────────────────────────────────────────────────────
+    if media_profile:
+        lines.append("\n## PROFIL MEDIA TARGET")
+        lines.append(f"Domain: {media_profile.get('nama', target_media)}")
+        lines.append(f"Audiens: {media_profile.get('audiens', '')}")
+        lines.append(f"Tone: {media_profile.get('tone', '')}")
+        lines.append(f"Kedalaman konten: {media_profile.get('kedalaman', '')}")
+        lines.append(f"Gaya penyajian: {media_profile.get('gaya', '')}")
+        if media_profile.get('topik_utama'):
+            lines.append(f"Topik utama: {', '.join(media_profile['topik_utama'])}")
+        if media_profile.get('konteks_brief'):
+            lines.append(f"Panduan penulisan untuk media ini: {media_profile['konteks_brief']}")
 
     # ── SERP data ─────────────────────────────────────────────────────────────
     if serp_data:

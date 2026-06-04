@@ -71,6 +71,7 @@ def generate_brief(
     serp_data: dict | None,
     api_key: str,
     model: str,
+    media_profile: dict | None = None,
 ) -> tuple[str, object]:
     client = get_client(api_key)
 
@@ -87,6 +88,7 @@ def generate_brief(
         n_tools=n_tools,
         scraped_results=scraped_results,
         serp_data=serp_data,
+        media_profile=media_profile,
     )
 
     messages = cast(list[ChatCompletionMessageParam], [

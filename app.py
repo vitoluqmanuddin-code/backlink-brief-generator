@@ -3,6 +3,7 @@ from serp import fetch_serp
 from scraper import scrape_urls
 from brief import detect_format, generate_brief
 from config import MODELS, DEFAULT_MODEL, FORMATS, PRODUCTS, calculate_cost
+from media_analyzer import analyze_media, fetch_all_profiles, extract_domain
 
 st.set_page_config(page_title="Backlink Brief Generator", layout="wide")
 
@@ -26,16 +27,21 @@ st.caption("Mekari Backlink Article Brief — by M. Vito Luqmanuddin")
 
 # ── SESSION STATE ─────────────────────────────────────────────────────────────
 for key, default in {
-    "serp_cache":    {},
-    "serp_result":   None,
-    "scraped":       None,
+    "serp_cache":      {},
+    "serp_result":     None,
+    "scraped":         None,
     "scraped_preview": None,
-    "brief_result":  None,
-    "usage":         None,
-    "model_id":      DEFAULT_MODEL,
+    "brief_result":    None,
+    "usage":           None,
+    "model_id":        DEFAULT_MODEL,
+    "media_profiles":  {},
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
+
+# ── LOAD MEDIA PROFILES FROM SHEET ───────────────────────────────────────────
+if not st.session_state["media_profiles"]:
+    st.session_state["media_profiles"] = fetch_all_profiles()
 
 # ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
@@ -75,7 +81,7 @@ col1, col2 = st.columns(2)
 with col1:
     keyword      = st.text_input("Keyword *", placeholder="e.g. spend management software")
     product      = st.selectbox("Produk Mekari *", PRODUCTS)
-    target_media = st.text_input("Placement media", placeholder="e.g. Katadata, VOI, Nusabali")
+    target_media = st.text_input("URL Placement media *", placeholder="e.g. https://katadata.co.id")
     mekari_source = st.text_area(
         "Mekari source (opsional)",
         placeholder="Paste URL atau teks deskripsi produk Mekari. Kosongkan jika tidak ada.",
@@ -136,6 +142,45 @@ def validate_inputs(check_serp=False, check_manual=False):
         errors.append("Minimal 3 URL kompetitor untuk mode Manual.")
     return errors
 
+def get_or_analyze_media(media_url: str) -> dict | None:
+    """Ambil profil media dari cache/Sheet, atau analisis baru."""
+    if not media_url:
+        return None
+    domain = extract_domain(media_url)
+    
+    # Cek session cache
+    if domain in st.session_state["media_profiles"]:
+        st.info(f"Profil media {domain} diambil dari cache.")
+        return st.session_state["media_profiles"][domain]
+    
+    # Analisis baru
+    try:
+        profile = analyze_media(media_url, api_key, model_id)
+        st.session_state["media_profiles"][domain] = profile
+        from media_analyzer import save_profile_to_sheet
+        save_profile_to_sheet(domain, profile)
+        return profile
+    except Exception as e:
+        st.warning(f"Gagal analisis media: {e}")
+        return None
+
+
+def show_media_profile(profile: dict):
+    """Tampilkan profil media di UI."""
+    with st.expander(f"Profil media — {profile.get('nama', '')}", expanded=True):
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.markdown(f"**Audiens:** {profile.get('audiens', '-')}")
+            st.markdown(f"**Tone:** {profile.get('tone', '-')}")
+            st.markdown(f"**Kedalaman:** {profile.get('kedalaman', '-')}")
+        with col_b:
+            st.markdown(f"**Gaya:** {profile.get('gaya', '-')}")
+            topik = profile.get('topik_utama', [])
+            if topik:
+                st.markdown(f"**Topik utama:** {', '.join(topik)}")
+        if profile.get('konteks_brief'):
+            st.info(f"💡 {profile['konteks_brief']}")
+
 
 # ── MODE: AUTO — SCRAPE SEMUA ─────────────────────────────────────────────────
 if url_mode == "Auto — scrape semua":
@@ -186,6 +231,11 @@ if url_mode == "Auto — scrape semua":
         if ok < 2:
             st.error("Terlalu sedikit sumber valid (minimal 2).")
             st.stop()
+
+        # Analisis media
+        media_profile = get_or_analyze_media(target_media)
+        if media_profile:
+            show_media_profile(media_profile)
 
         # Detect format
         article_format = format_choice
