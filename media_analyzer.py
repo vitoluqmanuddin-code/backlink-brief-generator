@@ -125,10 +125,31 @@ def fetch_sitemap_urls(base_url: str, max_urls: int = 20) -> list[str]:
             r = httpx.get(sitemap_url, timeout=10, follow_redirects=True, headers={"User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1)"})
             soup = BeautifulSoup(r.text, "xml")
             locs = soup.find_all("loc")
-            for loc in locs:
-                u = loc.get_text(strip=True)
-                if u and u not in urls:
-                    urls.append(u)
+            loc_texts = [loc.get_text(strip=True) for loc in locs]
+
+            # Cek apakah ini sitemap index (isinya .xml semua)
+            is_index = all(u.endswith(".xml") for u in loc_texts if u)
+            if is_index and loc_texts:
+                # Fetch sitemap pertama yang bukan images
+                child_sitemaps = [u for u in loc_texts if "image" not in u and "images" not in u]
+                for child_url in child_sitemaps[:2]:
+                    try:
+                        r2 = httpx.get(child_url, timeout=10, follow_redirects=True, headers={"User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1)"})
+                        soup2 = BeautifulSoup(r2.text, "xml")
+                        locs2 = soup2.find_all("loc")
+                        for loc in locs2:
+                            u = loc.get_text(strip=True)
+                            if u and not u.endswith(".xml") and u not in urls:
+                                urls.append(u)
+                        if urls:
+                            break
+                    except Exception:
+                        continue
+            else:
+                for u in loc_texts:
+                    if u and u not in urls:
+                        urls.append(u)
+
             if urls:
                 break
         except Exception:
