@@ -233,6 +233,7 @@ if url_mode == "Auto — scrape semua":
             st.stop()
 
         # Analisis media
+        st.write(f"DEBUG target_media: '{target_media}'")
         media_profile = get_or_analyze_media(target_media)
         if media_profile:
             show_media_profile(media_profile)
