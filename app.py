@@ -166,6 +166,7 @@ def get_or_analyze_media(media_url: str) -> dict | None:
     
     # Analisis baru
     try:
+        st.info(f"Menganalisis profil media {domain}...")
         profile = analyze_media(media_url, api_key, model_id)
         st.session_state["media_profiles"][domain] = profile
         from media_analyzer import save_profile_to_sheet
@@ -173,6 +174,7 @@ def get_or_analyze_media(media_url: str) -> dict | None:
         return profile
     except Exception as e:
         st.warning(f"Gagal analisis media: {e}")
+        st.exception(e)
         return None
 
 
