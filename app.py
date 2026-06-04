@@ -1,4 +1,14 @@
 import streamlit as st
+import subprocess
+import sys
+
+# Install playwright browsers if not already installed
+try:
+    subprocess.run([sys.executable, "-m", "playwright", "install", "chromium"],
+                   capture_output=True, timeout=60)
+except Exception:
+    pass
+
 from serp import fetch_serp
 from scraper import scrape_urls
 from brief import detect_format, generate_brief
