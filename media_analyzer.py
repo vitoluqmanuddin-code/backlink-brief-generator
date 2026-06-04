@@ -127,7 +127,7 @@ def fetch_sitemap_urls(base_url: str, max_urls: int = 20) -> list[str]:
             locs = soup.find_all("loc")
             for loc in locs:
                 u = loc.get_text(strip=True)
-                if u and base_url in u and u not in urls:
+                if u and u not in urls:
                     urls.append(u)
             if urls:
                 break

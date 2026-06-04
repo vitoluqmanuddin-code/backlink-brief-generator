@@ -234,7 +234,6 @@ if url_mode == "Auto — scrape semua":
             st.stop()
 
         # Analisis media
-        st.write(f"DEBUG target_media: '{target_media}'")
         media_profile = get_or_analyze_media(target_media)
         if media_profile:
             show_media_profile(media_profile)
@@ -269,6 +268,7 @@ if url_mode == "Auto — scrape semua":
                     serp_data=serp_data,
                     api_key=api_key,
                     model=model_id,
+                    media_profile=media_profile,
                 )
                 st.session_state["brief_result"] = result
                 st.session_state["usage"]        = usage
