@@ -37,7 +37,7 @@ with st.sidebar:
     st.header("Mode input URL")
     url_mode = st.radio(
         "Sumber URL kompetitor:",
-        ["Auto — top 5 langsung", "Auto — pilih dari SERP", "Manual"],
+        ["Auto — scrape semua", "Auto — pilih dari SERP", "Manual"],
         index=0,
     )
     st.divider()
@@ -146,14 +146,14 @@ if url_mode == "Auto — top 5 langsung":
                     st.error(f"SERP error: {e}")
                     st.stop()
 
-            urls = [r["url"] for r in serp_data["organic"]][:5]
-            st.success(f"Top 5 URL diambil dari SERP.")
+            urls = [r["url"] for r in serp_data["organic"]]
+            st.success(f"{len(urls)} URL diambil dari SERP.")
 
             with st.expander("URL yang di-scrape"):
-                for r in serp_data["organic"][:5]:
+                for r in serp_data["organic"]:
                     st.write(f"{r['position']}. [{r['title']}]({r['url']})")
 
-            with st.spinner("Scraping top 5 kompetitor..."):
+            with st.spinner("Scraping kompetitor..."):
                 scraped = scrape_urls(urls)
 
             st.session_state["serp_cache"][cache_key] = {"serp": serp_data, "scraped": scraped}

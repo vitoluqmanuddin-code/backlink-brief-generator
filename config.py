@@ -32,6 +32,8 @@ PRODUCTS = [
     "Mekari Qontak",
     "Mekari Officeless",
     "Mekari",
+    "Mekari Desty",
+    "Mekari Klikpajak",
 ]
 
 # ── Pricing (USD per 1M tokens) ───────────────────────────────────────────────
