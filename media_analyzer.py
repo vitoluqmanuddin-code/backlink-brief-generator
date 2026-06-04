@@ -96,7 +96,7 @@ def fetch_sitemap_urls(base_url: str, max_urls: int = 20) -> list[str]:
 
     # Cek robots.txt dulu
     try:
-        r = httpx.get(f"{base_url}/robots.txt", timeout=10, follow_redirects=True)
+        r = httpx.get(f"{base_url}/robots.txt", timeout=10, follow_redirects=True, headers={"User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1)"})
         for line in r.text.splitlines():
             if line.lower().startswith("sitemap:"):
                 sitemap_candidates.append(line.split(":", 1)[1].strip())
@@ -115,7 +115,7 @@ def fetch_sitemap_urls(base_url: str, max_urls: int = 20) -> list[str]:
     urls = []
     for sitemap_url in sitemap_candidates[:3]:
         try:
-            r = httpx.get(sitemap_url, timeout=10, follow_redirects=True)
+            r = httpx.get(sitemap_url, timeout=10, follow_redirects=True, headers={"User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1)"})
             soup = BeautifulSoup(r.text, "xml")
             locs = soup.find_all("loc")
             for loc in locs:

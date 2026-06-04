@@ -382,6 +382,10 @@ elif url_mode == "Auto — pilih dari SERP":
                         if errors:
                             st.stop()
 
+                        media_profile = get_or_analyze_media(target_media)
+                        if media_profile:
+                            show_media_profile(media_profile)
+
                         article_format = format_choice
                         if format_choice == "auto":
                             with st.spinner("Mendeteksi format artikel..."):
@@ -410,6 +414,7 @@ elif url_mode == "Auto — pilih dari SERP":
                                     serp_data=serp_data,
                                     api_key=api_key,
                                     model=model_id,
+                                    media_profile=media_profile,
                                 )
                                 st.session_state["brief_result"] = result
                                 st.session_state["usage"]        = usage
@@ -445,6 +450,10 @@ elif url_mode == "Manual":
             st.error("Terlalu sedikit sumber valid (minimal 2).")
             st.stop()
 
+        media_profile = get_or_analyze_media(target_media)
+        if media_profile:
+            show_media_profile(media_profile)
+
         article_format = format_choice
         with st.spinner("Generating brief..."):
             try:
@@ -463,6 +472,7 @@ elif url_mode == "Manual":
                     serp_data=None,
                     api_key=api_key,
                     model=model_id,
+                    media_profile=media_profile,
                 )
                 st.session_state["brief_result"] = result
                 st.session_state["usage"]        = usage
