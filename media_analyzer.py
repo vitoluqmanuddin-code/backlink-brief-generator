@@ -92,6 +92,13 @@ def fetch_sitemap_urls(base_url: str, max_urls: int = 20) -> list[str]:
     if not base_url.startswith("http"):
         base_url = "https://" + base_url
 
+    # Handle www redirect — ikuti redirect untuk dapat base URL final
+    try:
+        r = httpx.get(base_url, timeout=10, follow_redirects=True, headers={"User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1)"})
+        base_url = str(r.url).rstrip("/")
+    except Exception:
+        pass
+
     sitemap_candidates = []
 
     # Cek robots.txt dulu
@@ -130,8 +137,9 @@ def fetch_sitemap_urls(base_url: str, max_urls: int = 20) -> list[str]:
     # Ambil yang terbaru, skip homepage dan kategori
     article_urls = [
         u for u in urls
-        if len(u.split("/")) > 4
-        and not u.endswith(".xml")
+        if not u.endswith(".xml")
+        and not u.endswith(".jpg")
+        and not u.endswith(".png")
     ]
 
     return article_urls[:max_urls]
