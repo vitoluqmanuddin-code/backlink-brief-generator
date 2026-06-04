@@ -5,6 +5,20 @@ from brief import detect_format, generate_brief
 from config import MODELS, DEFAULT_MODEL, FORMATS, PRODUCTS, calculate_cost
 
 st.set_page_config(page_title="Backlink Brief Generator", layout="wide")
+
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
+
+if not st.session_state["authenticated"]:
+    st.title("Backlink Brief Generator")
+    pwd = st.text_input("Password", type="password")
+    if st.button("Login"):
+        if pwd == st.secrets["APP_PASSWORD"]:
+            st.session_state["authenticated"] = True
+            st.rerun()
+        else:
+            st.error("Password salah.")
+    st.stop()
 st.title("Backlink Brief Generator")
 st.caption("Mekari Backlink Article Brief — by M. Vito Luqmanuddin")
 
