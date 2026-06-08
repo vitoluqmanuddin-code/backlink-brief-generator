@@ -84,6 +84,7 @@ def build_boilerplate_text(data: dict, product: str, module: str | None, feature
         if r.get("Product") == product and r.get("Brief"):
             parts.append(f"[Produk: {product}]\n{r['Brief']}")
 
+    st.write(f"DEBUG build: module={module!r}, feature={feature!r}, parts before feature block={parts}")
     if feature and module:
         # Pilih fitur → produk + fitur saja
         for r in data["features"]:
