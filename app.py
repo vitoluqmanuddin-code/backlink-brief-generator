@@ -159,7 +159,7 @@ with st.expander("Boilerplate produk Mekari (opsional)", expanded=False):
             st.write(f"DEBUG bp_text length: {len(bp_text)}")
             st.write(f"DEBUG modul ada di bp_text: {'[Modul:' in bp_text}")
             st.markdown(f"**Preview boilerplate — {bp_product}:**")
-            st.text_area("", value=bp_text, height=150, key="bp_preview", disabled=True)
+            st.text_area("", value=bp_text, height=150, disabled=True)
         else:
             st.info(f"Belum ada boilerplate untuk {bp_product}. Tambahkan via form di bawah atau langsung di Google Sheet.")
 
