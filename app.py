@@ -174,15 +174,21 @@ with st.expander("Boilerplate produk Mekari (opsional)", expanded=False):
         new_brief = st.text_area("Brief / boilerplate", height=150, key="new_brief")
 
     if st.button("Simpan boilerplate", key="save_bp"):
-        if not new_product or not new_brief:
-            st.error("Produk dan Brief wajib diisi.")
-        elif new_level == "Modul" and not new_module:
-            st.error("Nama modul wajib diisi.")
-        elif new_level == "Fitur" and (not new_module or not new_feature):
-            st.error("Nama modul dan fitur wajib diisi.")
+        errors = []
+        if not new_brief:
+            errors.append("Brief wajib diisi.")
+        if new_level == "Modul" and not new_module:
+            errors.append("Nama modul wajib diisi.")
+        if new_level == "Fitur" and not new_module:
+            errors.append("Nama modul wajib diisi.")
+        if new_level == "Fitur" and not new_feature:
+            errors.append("Nama fitur wajib diisi.")
+        if errors:
+            for e in errors:
+                st.error(e)
         else:
             save_boilerplate(new_level, new_product, new_module, new_feature, new_brief)
-            st.success("Boilerplate tersimpan. Refresh untuk lihat perubahan.")
+            st.success("Boilerplate tersimpan.")
             st.session_state["boilerplate_data"] = fetch_boilerplate_all()
 
 # Manual URL input
