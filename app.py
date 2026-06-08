@@ -190,6 +190,7 @@ with st.expander("Boilerplate produk Mekari (opsional)", expanded=False):
             save_boilerplate(new_level, new_product, new_module, new_feature, new_brief)
             st.success("Boilerplate tersimpan.")
             st.session_state["boilerplate_data"] = fetch_boilerplate_all()
+            st.rerun()
 
 # Manual URL input
 if url_mode == "Manual":
