@@ -84,14 +84,11 @@ def build_boilerplate_text(data: dict, product: str, module: str | None, feature
         if r.get("Product") == product and r.get("Brief"):
             parts.append(f"[Produk: {product}]\n{r['Brief']}")
 
-    st.write(f"DEBUG build: module={module!r}, feature={feature!r}, parts before feature block={parts}")
     if feature and module:
         # Pilih fitur → produk + fitur saja
-        st.write(f"DEBUG masuk blok feature+module")
         for r in data["features"]:
             if r.get("Product") == product and r.get("Module") == module and r.get("Feature") == feature:
                 if r.get("Brief"):
-                    st.write(f"DEBUG append fitur: {feature}")
                     parts.append(f"[Fitur: {feature}]\n{r['Brief']}")
 
     elif module and not feature:
