@@ -166,9 +166,10 @@ with st.expander("Boilerplate produk Mekari (opsional)", expanded=False):
     col_f1, col_f2 = st.columns(2)
     with col_f1:
         new_level   = st.selectbox("Level", ["Produk", "Modul", "Fitur"], key="new_level")
-        new_product = st.text_input("Produk", key="new_product")
-        new_module  = st.text_input("Modul (opsional)", key="new_module") if new_level in ["Modul", "Fitur"] else ""
-        new_feature = st.text_input("Fitur", key="new_feature") if new_level == "Fitur" else ""
+        st.text_input("Produk", value=product, disabled=True, key="new_product_display")
+        new_product = product
+        new_module  = st.text_input("Modul *", key="new_module") if new_level in ["Modul", "Fitur"] else ""
+        new_feature = st.text_input("Fitur *", key="new_feature") if new_level == "Fitur" else ""
     with col_f2:
         new_brief = st.text_area("Brief / boilerplate", height=150, key="new_brief")
 
