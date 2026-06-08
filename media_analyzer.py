@@ -49,7 +49,7 @@ def fetch_all_profiles() -> dict:
     """Fetch semua profil media dari Google Sheet."""
     try:
         client = get_gsheet_client()
-        sheet  = client.open_by_key(st.secrets["SHEET_ID"]).sheet1
+        sheet  = client.open_by_key(st.secrets["SHEET_ID"]).worksheet("Media")
         rows   = sheet.get_all_records()
         return {row["Domain"]: row for row in rows if row.get("Domain")}
     except Exception as e:
@@ -61,7 +61,7 @@ def save_profile_to_sheet(domain: str, profile: dict):
     """Tulis profil media baru ke Google Sheet."""
     try:
         client = get_gsheet_client()
-        sheet  = client.open_by_key(st.secrets["SHEET_ID"]).sheet1
+        sheet  = client.open_by_key(st.secrets["SHEET_ID"]).worksheet("Media")
         from datetime import date
         sheet.append_row([
             domain,
