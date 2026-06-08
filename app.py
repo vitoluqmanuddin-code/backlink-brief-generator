@@ -156,6 +156,8 @@ with st.expander("Boilerplate produk Mekari (opsional)", expanded=False):
         bp_text = build_boilerplate_text(bp_data, bp_product, selected_module, selected_feature)
         st.session_state["boilerplate_text"] = bp_text
         if bp_text:
+            st.write(f"DEBUG bp_text: {bp_text[:100]}")
+            st.write(f"DEBUG session: {st.session_state['boilerplate_text'][:100]}")
             st.markdown(f"**Preview boilerplate — {bp_product}:**")
             st.text_area("", value=bp_text, height=150, key="bp_preview", disabled=True)
         else:
