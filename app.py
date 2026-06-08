@@ -83,11 +83,13 @@ with st.sidebar:
     st.divider()
 
     if st.button("Clear cache"):
-        st.session_state["serp_cache"]   = {}
-        st.session_state["serp_result"]  = None
-        st.session_state["scraped"]      = None
-        st.session_state["brief_result"] = None
-        st.session_state["usage"]        = None
+        st.session_state["serp_cache"]       = {}
+        st.session_state["serp_result"]      = None
+        st.session_state["scraped"]          = None
+        st.session_state["brief_result"]     = None
+        st.session_state["usage"]            = None
+        st.session_state["boilerplate_data"] = None
+        st.session_state["media_profiles"]   = {}
         st.success("Cache dikosongkan.")
 
 

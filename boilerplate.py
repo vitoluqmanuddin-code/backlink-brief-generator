@@ -79,13 +79,20 @@ def build_boilerplate_text(data: dict, product: str, module: str | None, feature
     """
     parts = []
 
+    # Produk selalu masuk
+    for r in data["products"]:
+        if r.get("Product") == product and r.get("Brief"):
+            parts.append(f"[Produk: {product}]\n{r['Brief']}")
+
     if feature and module:
+        # Pilih fitur → produk + fitur saja
         for r in data["features"]:
             if r.get("Product") == product and r.get("Module") == module and r.get("Feature") == feature:
                 if r.get("Brief"):
                     parts.append(f"[Fitur: {feature}]\n{r['Brief']}")
 
     elif module and not feature:
+        # Pilih modul → produk + modul + semua fitur di modul
         for r in data["modules"]:
             if r.get("Product") == product and r.get("Module") == module:
                 if r.get("Brief"):
@@ -96,18 +103,13 @@ def build_boilerplate_text(data: dict, product: str, module: str | None, feature
                     parts.append(f"[Fitur: {r['Feature']}]\n{r['Brief']}")
 
     else:
-        for r in data["products"]:
-            if r.get("Product") == product:
-                if r.get("Brief"):
-                    parts.append(f"[Produk: {product}]\n{r['Brief']}")
+        # Pilih produk saja → semua modul + semua fitur
         for r in data["modules"]:
-            if r.get("Product") == product:
-                if r.get("Brief"):
-                    parts.append(f"[Modul: {r['Module']}]\n{r['Brief']}")
+            if r.get("Product") == product and r.get("Brief"):
+                parts.append(f"[Modul: {r['Module']}]\n{r['Brief']}")
         for r in data["features"]:
-            if r.get("Product") == product:
-                if r.get("Brief"):
-                    parts.append(f"[Fitur: {r['Feature']}]\n{r['Brief']}")
+            if r.get("Product") == product and r.get("Brief"):
+                parts.append(f"[Fitur: {r['Feature']}]\n{r['Brief']}")
 
     return "\n\n".join(parts)
 
