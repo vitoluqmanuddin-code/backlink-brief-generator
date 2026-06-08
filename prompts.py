@@ -227,6 +227,7 @@ def build_user_prompt(
     scraped_results: list[dict],
     serp_data: dict | None = None,
     media_profile: dict | None = None,
+    boilerplate_text: str = "",
 ) -> str:
 
     lines = []
@@ -260,6 +261,12 @@ def build_user_prompt(
             lines.append(f"Topik utama: {', '.join(media_profile['topik_utama'])}")
         if media_profile.get('konteks_brief'):
             lines.append(f"Panduan penulisan untuk media ini: {media_profile['konteks_brief']}")
+
+    # ── Boilerplate produk ────────────────────────────────────────────────────
+    if boilerplate_text:
+        lines.append("\n## BOILERPLATE PRODUK MEKARI")
+        lines.append("Gunakan teks berikut sebagai referensi deskripsi produk — jangan fabrikasi di luar ini:")
+        lines.append(boilerplate_text)
 
     # ── SERP data ─────────────────────────────────────────────────────────────
     if serp_data:

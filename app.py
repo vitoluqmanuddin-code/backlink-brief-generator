@@ -14,6 +14,7 @@ from scraper import scrape_urls
 from brief import detect_format, generate_brief
 from config import MODELS, DEFAULT_MODEL, FORMATS, PRODUCTS, calculate_cost
 from media_analyzer import analyze_media, fetch_all_profiles, extract_domain
+from boilerplate import fetch_boilerplate_all, get_product_list, get_module_list, get_feature_list, build_boilerplate_text, save_boilerplate
 
 st.set_page_config(page_title="Backlink Brief Generator", layout="wide")
 
@@ -44,8 +45,10 @@ for key, default in {
     "brief_result":    None,
     "usage":           None,
     "model_id":        DEFAULT_MODEL,
-    "media_profiles":       {},
+    "media_profiles":        {},
     "media_profile_preview": None,
+    "boilerplate_data":      None,
+    "boilerplate_text":      "",
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
@@ -53,6 +56,10 @@ for key, default in {
 # ── LOAD MEDIA PROFILES FROM SHEET ───────────────────────────────────────────
 if not st.session_state["media_profiles"]:
     st.session_state["media_profiles"] = fetch_all_profiles()
+
+# ── LOAD BOILERPLATE FROM SHEET ──────────────────────────────────────────────
+if not st.session_state["boilerplate_data"]:
+    st.session_state["boilerplate_data"] = fetch_boilerplate_all()
 
 # ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
@@ -121,6 +128,61 @@ with col4:
     n_tools = None
     if format_choice == "listicle":
         n_tools = st.number_input("Jumlah tools dalam listicle", min_value=3, max_value=15, value=7)
+
+# ── BOILERPLATE PRODUK ────────────────────────────────────────────────────────
+st.divider()
+with st.expander("Boilerplate produk Mekari (opsional)", expanded=False):
+    bp_data = st.session_state["boilerplate_data"] or {"products": [], "modules": [], "features": []}
+    product_list = get_product_list(bp_data)
+
+    if not product_list:
+        st.info("Belum ada boilerplate. Tambahkan via form di bawah atau langsung di Google Sheet.")
+    else:
+        col_bp1, col_bp2, col_bp3 = st.columns(3)
+        with col_bp1:
+            bp_product = st.selectbox("Produk", ["(tidak dipilih)"] + product_list, key="bp_product")
+        with col_bp2:
+            bp_module_list = get_module_list(bp_data, bp_product) if bp_product != "(tidak dipilih)" else []
+            bp_module = st.selectbox("Modul (opsional)", ["(semua)"] + bp_module_list, key="bp_module")
+        with col_bp3:
+            bp_feature_list = get_feature_list(bp_data, bp_product, bp_module) if bp_module != "(semua)" else []
+            bp_feature = st.selectbox("Fitur (opsional)", ["(semua)"] + bp_feature_list, key="bp_feature")
+
+        if bp_product != "(tidak dipilih)":
+            selected_module  = None if bp_module == "(semua)" else bp_module
+            selected_feature = None if bp_feature == "(semua)" else bp_feature
+            bp_text = build_boilerplate_text(bp_data, bp_product, selected_module, selected_feature)
+            st.session_state["boilerplate_text"] = bp_text
+            if bp_text:
+                st.markdown("**Preview boilerplate yang masuk ke prompt:**")
+                st.text_area("", value=bp_text, height=150, key="bp_preview", disabled=True)
+            else:
+                st.warning("Tidak ada boilerplate untuk pilihan ini.")
+        else:
+            st.session_state["boilerplate_text"] = ""
+
+    st.divider()
+    st.markdown("**Tambah boilerplate baru**")
+    col_f1, col_f2 = st.columns(2)
+    with col_f1:
+        new_level   = st.selectbox("Level", ["Produk", "Modul", "Fitur"], key="new_level")
+        new_product = st.text_input("Produk", key="new_product")
+        new_module  = st.text_input("Modul (opsional)", key="new_module") if new_level in ["Modul", "Fitur"] else ""
+        new_feature = st.text_input("Fitur", key="new_feature") if new_level == "Fitur" else ""
+    with col_f2:
+        new_brief = st.text_area("Brief / boilerplate", height=150, key="new_brief")
+
+    if st.button("Simpan boilerplate", key="save_bp"):
+        if not new_product or not new_brief:
+            st.error("Produk dan Brief wajib diisi.")
+        elif new_level == "Modul" and not new_module:
+            st.error("Nama modul wajib diisi.")
+        elif new_level == "Fitur" and (not new_module or not new_feature):
+            st.error("Nama modul dan fitur wajib diisi.")
+        else:
+            save_boilerplate(new_level, new_product, new_module, new_feature, new_brief)
+            st.success("Boilerplate tersimpan. Refresh untuk lihat perubahan.")
+            st.session_state["boilerplate_data"] = fetch_boilerplate_all()
 
 # Manual URL input
 if url_mode == "Manual":
@@ -281,6 +343,7 @@ if url_mode == "Auto — scrape semua":
                     api_key=api_key,
                     model=model_id,
                     media_profile=media_profile,
+                    boilerplate_text=st.session_state.get("boilerplate_text", ""),
                 )
                 st.session_state["brief_result"] = result
                 st.session_state["usage"]        = usage
@@ -290,7 +353,7 @@ if url_mode == "Auto — scrape semua":
                 st.stop()
 
 
-# ── MODE: AUTO — PILIH DARI SERP ─────────────────────────────────────────────
+# ── MODE: AUTO — PILIH DARI SERP
 elif url_mode == "Auto — pilih dari SERP":
     st.divider()
 
@@ -431,6 +494,7 @@ elif url_mode == "Auto — pilih dari SERP":
                                     api_key=api_key,
                                     model=model_id,
                                     media_profile=media_profile,
+                                    boilerplate_text=st.session_state.get("boilerplate_text", ""),
                                 )
                                 st.session_state["brief_result"] = result
                                 st.session_state["usage"]        = usage
@@ -489,6 +553,7 @@ elif url_mode == "Manual":
                     api_key=api_key,
                     model=model_id,
                     media_profile=media_profile,
+                    boilerplate_text=st.session_state.get("boilerplate_text", ""),
                 )
                 st.session_state["brief_result"] = result
                 st.session_state["usage"]        = usage
@@ -498,7 +563,7 @@ elif url_mode == "Manual":
                 st.stop()
 
 
-# ── OUTPUT ────────────────────────────────────────────────────────────────────
+# ── OUTPUT
 if st.session_state["brief_result"]:
     st.divider()
     if st.session_state.get("usage"):
