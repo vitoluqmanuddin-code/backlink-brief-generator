@@ -140,28 +140,26 @@ with st.expander("Boilerplate produk Mekari (opsional)", expanded=False):
     if not product_list:
         st.info("Belum ada boilerplate. Tambahkan via form di bawah atau langsung di Google Sheet.")
     else:
-        col_bp1, col_bp2, col_bp3 = st.columns(3)
+        # Produk otomatis dari main form
+        bp_product = product
+
+        col_bp1, col_bp2 = st.columns(2)
         with col_bp1:
-            bp_product = st.selectbox("Produk", ["(tidak dipilih)"] + product_list, key="bp_product")
-        with col_bp2:
-            bp_module_list = get_module_list(bp_data, bp_product) if bp_product != "(tidak dipilih)" else []
+            bp_module_list = get_module_list(bp_data, bp_product)
             bp_module = st.selectbox("Modul (opsional)", ["(semua)"] + bp_module_list, key="bp_module")
-        with col_bp3:
+        with col_bp2:
             bp_feature_list = get_feature_list(bp_data, bp_product, bp_module) if bp_module != "(semua)" else []
             bp_feature = st.selectbox("Fitur (opsional)", ["(semua)"] + bp_feature_list, key="bp_feature")
 
-        if bp_product != "(tidak dipilih)":
-            selected_module  = None if bp_module == "(semua)" else bp_module
-            selected_feature = None if bp_feature == "(semua)" else bp_feature
-            bp_text = build_boilerplate_text(bp_data, bp_product, selected_module, selected_feature)
-            st.session_state["boilerplate_text"] = bp_text
-            if bp_text:
-                st.markdown("**Preview boilerplate yang masuk ke prompt:**")
-                st.text_area("", value=bp_text, height=150, key="bp_preview", disabled=True)
-            else:
-                st.warning("Tidak ada boilerplate untuk pilihan ini.")
+        selected_module  = None if bp_module == "(semua)" else bp_module
+        selected_feature = None if bp_feature == "(semua)" else bp_feature
+        bp_text = build_boilerplate_text(bp_data, bp_product, selected_module, selected_feature)
+        st.session_state["boilerplate_text"] = bp_text
+        if bp_text:
+            st.markdown(f"**Preview boilerplate — {bp_product}:**")
+            st.text_area("", value=bp_text, height=150, key="bp_preview", disabled=True)
         else:
-            st.session_state["boilerplate_text"] = ""
+            st.info(f"Belum ada boilerplate untuk {bp_product}. Tambahkan via form di bawah atau langsung di Google Sheet.")
 
     st.divider()
     st.markdown("**Tambah boilerplate baru**")
