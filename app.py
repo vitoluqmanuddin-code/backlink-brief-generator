@@ -138,20 +138,37 @@ with st.expander("Boilerplate produk Mekari (opsional)", expanded=False):
     if not product_list:
         st.info("Belum ada boilerplate. Tambahkan via form di bawah atau langsung di Google Sheet.")
     else:
-        col_bp1, col_bp2, col_bp3 = st.columns(3)
-        with col_bp1:
-            bp_product = st.selectbox("Produk", ["(tidak dipilih)"] + product_list, key="bp_product")
-        with col_bp2:
-            bp_module_list = get_module_list(bp_data, bp_product) if bp_product != "(tidak dipilih)" else []
-            bp_module = st.selectbox("Modul (opsional)", ["(semua)"] + bp_module_list, key="bp_module")
-        with col_bp3:
-            bp_feature_list = get_feature_list(bp_data, bp_product, bp_module) if bp_module != "(semua)" else []
-            bp_feature = st.selectbox("Fitur (opsional)", ["(semua)"] + bp_feature_list, key="bp_feature")
+        # Buat flat list semua entri
+        flat_options = ["(tidak dipilih)"]
+        flat_map = {}
 
-        if bp_product != "(tidak dipilih)":
-            selected_module  = None if bp_module == "(semua)" else bp_module
-            selected_feature = None if bp_feature == "(semua)" else bp_feature
-            bp_text = build_boilerplate_text(bp_data, bp_product, selected_module, selected_feature)
+        for r in bp_data["products"]:
+            if r.get("Product"):
+                label = f"[Produk] {r['Product']}"
+                flat_options.append(label)
+                flat_map[label] = {"product": r["Product"], "module": None, "feature": None}
+
+        for r in bp_data["modules"]:
+            if r.get("Product") and r.get("Module"):
+                label = f"[Modul] {r['Product']} — {r['Module']}"
+                flat_options.append(label)
+                flat_map[label] = {"product": r["Product"], "module": r["Module"], "feature": None}
+
+        for r in bp_data["features"]:
+            if r.get("Product") and r.get("Module") and r.get("Feature"):
+                label = f"[Fitur] {r['Product']} — {r['Module']} — {r['Feature']}"
+                flat_options.append(label)
+                flat_map[label] = {"product": r["Product"], "module": r["Module"], "feature": r["Feature"]}
+
+        selected_label = st.selectbox(
+            "Cari produk, modul, atau fitur:",
+            flat_options,
+            key="bp_flat_select",
+        )
+
+        if selected_label != "(tidak dipilih)":
+            sel = flat_map[selected_label]
+            bp_text = build_boilerplate_text(bp_data, sel["product"], sel["module"], sel["feature"])
             st.session_state["boilerplate_text"] = bp_text
             if bp_text:
                 st.markdown("**Preview boilerplate yang masuk ke prompt:**")
