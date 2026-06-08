@@ -154,14 +154,18 @@ with st.expander("Boilerplate produk Mekari (opsional)", expanded=False):
             selected_module  = None if bp_module == "(semua)" else bp_module
             selected_feature = None if bp_feature == "(semua)" else bp_feature
             bp_text = build_boilerplate_text(bp_data, bp_product, selected_module, selected_feature)
-            st.session_state["boilerplate_text"] = bp_text
+            if bp_text != st.session_state["boilerplate_text"]:
+                st.session_state["boilerplate_text"] = bp_text
+                st.rerun()
             if bp_text:
                 st.markdown("**Preview boilerplate yang masuk ke prompt:**")
                 st.text_area("", value=bp_text, height=150, key="bp_preview", disabled=True)
             else:
                 st.warning("Tidak ada boilerplate untuk pilihan ini.")
         else:
-            st.session_state["boilerplate_text"] = ""
+            if st.session_state["boilerplate_text"] != "":
+                st.session_state["boilerplate_text"] = ""
+                st.rerun()
 
     st.divider()
     st.markdown("**Tambah boilerplate baru**")
